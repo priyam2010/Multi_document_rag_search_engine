@@ -33,34 +33,15 @@ The primary goals of this project are to:
 
 User Query
 │
-▼
 Query Classification (Document / Web / Hybrid)
 │
 ├── FAISS Vector Search (Local Docs)
 ├── Tavily Web Search (Real-Time)
-▼
-Context Assembly
-▼
-LLM (Groq via LangChain)
-▼
-Answer + Citations
-▼
-Streamlit UI
+├──Context Assembly
+├──LLM (Groq via LangChain)
+├──Answer + Citations
+├──Streamlit UI
 
-
----
-
-## 🛠 Tech Stack (Strictly Followed)
-
-| Component | Technology |
-|---------|------------|
-| Language | Python |
-| LLM Orchestration | LangChain |
-| LLM Provider | Groq |
-| Vector Database | FAISS |
-| Embeddings | Sentence-Transformers |
-| Web Search | Tavily |
-| UI | Streamlit |
 
 ---
 
