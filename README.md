@@ -1,9 +1,4 @@
 # 🚀 GA02: Multi-Document Hybrid RAG Search Engine
-*(Document Retrieval + Real-Time Web Search)*
-
-## Video_Link : https://drive.google.com/file/d/1hN9EwD0YSRetrEs7azxZBvBN1z-_pq5q/view?usp=sharing
-
----
 
 ## 📌 Project Overview
 
@@ -26,9 +21,9 @@ The primary goals of this project are to:
 - Perform semantic retrieval using FAISS
 - Integrate real-time web search via Tavily
 - Dynamically route queries between:
-  - 📄 Document-based search
-  - 🌐 Web-based search
-  - 🔀 Hybrid search
+  - Document-based search
+  - Web-based search
+  - Hybrid search
 - Generate grounded answers with clear citations
 - Provide a clean, user-friendly Streamlit UI
 
@@ -201,25 +196,4 @@ TAVILY_API_KEY=your_tavily_key
 4️⃣ Run the App
 streamlit run app.py
 
-🏁 Final Outcome
 
-By completing this project, the following learning outcomes are demonstrated:
-
-✅ Multi-document RAG system design
-
-✅ Hybrid retrieval (vector + web)
-
-✅ Tavily real-time search integration
-
-✅ Citation-aware answer generation
-
-✅ Practical LangChain + Streamlit skills
-
-
-👤 Author
-
-Jatin Kanyan
-AI / Data Science Practitioner
-
-
----
