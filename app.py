@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 
 from loaders import load_uploaded_documents
@@ -20,8 +21,10 @@ groq_api_key = st.sidebar.text_input(
     type="password"
 )
 
+# 🌐 Enable web search
 use_web = st.sidebar.checkbox("Enable Tavily Web Search", value=True)
 
+# 📄 Upload documents
 uploaded_files = st.sidebar.file_uploader(
     "Upload documents (PDF / TXT)",
     type=["pdf", "txt"],
@@ -34,12 +37,14 @@ if st.sidebar.button("Index Documents"):
         st.sidebar.warning("Please upload documents first.")
     else:
         try:
+            # Load and chunk documents
             docs = load_uploaded_documents(uploaded_files)
             chunks = chunk_documents(docs)
 
+            # Index chunks into FAISS
             index_documents(chunks)
 
-            # ✅ Load FAISS only after indexing
+            # Load FAISS vectorstore into session state
             st.session_state.vectorstore = load_faiss_index()
 
             st.sidebar.success("✅ Documents Indexed Successfully")
@@ -63,6 +68,7 @@ if st.button("Search") and query:
 
     else:
         try:
+            # Generate answer using RAG pipeline
             answer, sources, route = generate_answer(
                 query=query,
                 vectorstore=st.session_state.vectorstore,
@@ -72,6 +78,7 @@ if st.button("Search") and query:
 
             icon = "📄" if route == "document" else "🌐" if route == "web" else "🔀"
 
+            # Display answer and sources in tabs
             tabs = st.tabs(["Answer", "Sources"])
 
             with tabs[0]:
