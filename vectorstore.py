@@ -3,21 +3,19 @@ from langchain_community.embeddings import HuggingFaceHubEmbeddings
 import os
 from config import FAISS_DIR
 
-# ✅ Streamlit Free SAFE embeddings (NO torch, NO sentence-transformers)
+
 def get_embeddings():
-    return HuggingFaceInferenceEmbeddings(
-        api_key=os.environ["HUGGINGFACE_API_KEY"],
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    return HuggingFaceHubEmbeddings(
+        repo_id="sentence-transformers/all-MiniLM-L6-v2",
+        huggingfacehub_api_token=os.environ["HUGGINGFACE_API_KEY"]
     )
+
 
 def index_documents(chunks):
     embeddings = get_embeddings()
 
     texts = [c["content"] for c in chunks]
     metadatas = [c["metadata"] for c in chunks]
-
-    if not texts:
-        raise ValueError("No text chunks found to index")
 
     vectorstore = FAISS.from_texts(
         texts=texts,
@@ -26,6 +24,7 @@ def index_documents(chunks):
     )
 
     vectorstore.save_local(FAISS_DIR)
+
 
 def load_faiss_index():
     if not os.path.exists(FAISS_DIR):
@@ -38,10 +37,3 @@ def load_faiss_index():
         embeddings,
         allow_dangerous_deserialization=True
     )
-
-
-
-
-
-
-
