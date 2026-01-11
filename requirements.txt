@@ -1,12 +1,14 @@
+streamlit
 langchain
 langchain-community
 langchain-groq
 langchain-huggingface
+langchain-text-splitters
 faiss-cpu
 sentence-transformers
-streamlit
 tavily-python
 pypdf
+pdfplumber
 wikipedia
 python-dotenv
-pdfplumber
+
