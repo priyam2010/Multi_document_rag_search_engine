@@ -1,24 +1,33 @@
+# vectorstore.py
 import os
 from langchain_community.vectorstores import FAISS
-from langchain.embeddings import HuggingFaceHubEmbeddings
+from langchain_community.embeddings import HuggingFaceInferenceEmbeddings
 from config import FAISS_DIR
+from dotenv import load_dotenv
 
-# Ensure your HuggingFace API key is set in env
+# Load .env
+load_dotenv()
+
+# Get HuggingFace API key
 HF_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
 if not HF_API_KEY:
-    raise ValueError("Please set HUGGINGFACE_API_KEY in .env")
+    raise ValueError("Please set HUGGINGFACE_API_KEY in your .env file")
 
 def get_embeddings():
-    """Return HuggingFace embeddings object using Hub API."""
-    return HuggingFaceHubEmbeddings(
-        repo_id="sentence-transformers/all-MiniLM-L6-v2",
+    """
+    Returns HuggingFace Inference Embeddings configured for CPU and Streamlit Free.
+    """
+    return HuggingFaceInferenceEmbeddings(
+        model="sentence-transformers/all-MiniLM-L6-v2",
+        task="feature-extraction",
         huggingfacehub_api_token=HF_API_KEY
     )
 
 def index_documents(chunks):
-    """Index document chunks into FAISS."""
+    """
+    Indexes document chunks into FAISS vectorstore.
+    """
     embeddings = get_embeddings()
-
     texts = [c["content"] for c in chunks]
     metadatas = [c["metadata"] for c in chunks]
 
@@ -30,7 +39,9 @@ def index_documents(chunks):
     vectorstore.save_local(FAISS_DIR)
 
 def load_faiss_index():
-    """Load FAISS index if it exists."""
+    """
+    Loads FAISS vectorstore if it exists, else returns None.
+    """
     if not os.path.exists(FAISS_DIR):
         return None
     embeddings = get_embeddings()
