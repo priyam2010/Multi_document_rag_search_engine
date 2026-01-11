@@ -1,26 +1,42 @@
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
-
-# API Keys
+# --------------------------------------------------
+# API KEYS (Streamlit Secrets preferred)
+# --------------------------------------------------
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
-# Models
+# Safety check (fail fast)
+if not GROQ_API_KEY:
+    raise RuntimeError("GROQ_API_KEY is not set")
+
+# --------------------------------------------------
+# MODELS
+# --------------------------------------------------
 LLM_MODEL = os.getenv("LLM_MODEL", "llama3-8b-8192")
+
 EMBEDDING_MODEL = os.getenv(
     "EMBEDDING_MODEL",
     "sentence-transformers/all-MiniLM-L6-v2"
 )
 
-# Chunking
-CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", 800))
-CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", 150))
+# --------------------------------------------------
+# CHUNKING (Safe defaults)
+# --------------------------------------------------
+CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", 1000))
+CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", 200))
 
-# Paths  ✅ THIS WAS MISSING
-DATA_DIR = "data/documents"
-FAISS_DIR = os.getenv("FAISS_DIR", "data/faiss_index")
+# --------------------------------------------------
+# PATHS
+# --------------------------------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Retrieval
-TOP_K = int(os.getenv("TOP_K", 5))
+DATA_DIR = os.path.join(BASE_DIR, "data", "documents")
+FAISS_DIR = os.path.join(BASE_DIR, "data", "faiss_index")
+
+# --------------------------------------------------
+# RETRIEVAL
+# --------------------------------------------------
+TOP_K = int(os.getenv("TOP_K", 4))
+
+
