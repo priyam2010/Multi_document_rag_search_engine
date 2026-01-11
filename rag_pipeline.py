@@ -15,55 +15,46 @@ def classify_query(query: str):
     return "document"
 
 def generate_answer(query, vectorstore, use_web=True):
-    # Check for API Key
+    # Check if API Key exists to prevent crash
     if not GOOGLE_API_KEY:
-        return "Error: GOOGLE_API_KEY is missing. Please set it in your environment or Streamlit secrets.", [], "error"
+        return "Error: GOOGLE_API_KEY is missing in Secrets/Env.", [], "error"
 
     route = classify_query(query)
     sources = []
     context_parts = []
 
-    # 1. Document Search
+    # 1. Document Retrieval
     if route in ["document", "hybrid"] and vectorstore:
-        try:
-            docs = vectorstore.similarity_search(query, k=TOP_K)
-            for d in docs:
-                text = safe_str(d.page_content)
-                if text.strip():
-                    context_parts.append(text)
-                    sources.append(
-                        f"[Doc] {d.metadata.get('title', 'Unknown')} | Chunk {d.metadata.get('chunk_index', '?')}"
-                    )
-        except Exception as e:
-            print(f"Vectorstore error: {e}")
+        docs = vectorstore.similarity_search(query, k=TOP_K)
+        for d in docs:
+            text = safe_str(d.page_content)
+            if text.strip():
+                context_parts.append(text)
+                sources.append(f"[Doc] {d.metadata.get('title', 'Unknown')} | Chunk {d.metadata.get('chunk_index', '?')}")
 
-    # 2. Web Search
+    # 2. Web Search Retrieval
     if route in ["web", "hybrid"] and use_web:
-        try:
-            for w in tavily_search(query):
-                text = safe_str(w.get("content"))
-                if text.strip():
-                    context_parts.append(text)
-                    sources.append(f"[Web] {w.get('title', 'Unknown')}")
-        except Exception as e:
-            print(f"Web search error: {e}")
+        web_results = tavily_search(query)
+        for w in web_results:
+            text = safe_str(w.get("content"))
+            if text.strip():
+                context_parts.append(text)
+                sources.append(f"[Web] {w.get('title', 'Unknown')}")
 
     context = "\n\n".join(context_parts).strip()
     if not context:
-        context = "No specific context found. Answer based on general knowledge."
+        context = "No specific context found. Answer using general knowledge."
 
     # 3. Gemini Generation
     try:
-        # Initialize inside the function to prevent top-level crashes
         llm = ChatGoogleGenerativeAI(
             model=LLM_MODEL,
             google_api_key=GOOGLE_API_KEY,
-            temperature=0.3,
-            max_output_tokens=800
+            temperature=0.3
         )
 
         messages = [
-            ("system", "You are a professional assistant. Use the provided context to answer the user question accurately. If the information isn't in the context, use your general knowledge but mention it."),
+            ("system", "You are a helpful assistant. Use the context to answer clearly."),
             ("human", f"Question: {query}\n\nContext:\n{context}")
         ]
 
@@ -71,5 +62,6 @@ def generate_answer(query, vectorstore, use_web=True):
         return response.content, list(set(sources)), route
 
     except Exception as e:
-        return f"Gemini API Error: {str(e)}", sources, route
+        return f"Gemini Error: {str(e)}", sources, route
+
 
