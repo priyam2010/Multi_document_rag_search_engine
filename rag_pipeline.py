@@ -6,10 +6,15 @@ from web_search import tavily_search
 import os
 from langchain_groq import ChatGroq
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+import streamlit as st
+from dotenv import load_dotenv
+
+load_dotenv()
+
+ROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 if not GROQ_API_KEY:
-    raise RuntimeError("GROQ_API_KEY is not set. Check .env loading.")
+    GROQ_API_KEY = None  
 
 from config import LLM_MODEL
 
@@ -61,3 +66,4 @@ Context:
     response = llm.invoke(prompt)
 
     return response.content, sources, route
+
