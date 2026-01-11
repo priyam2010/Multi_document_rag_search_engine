@@ -12,3 +12,4 @@ pdfplumber
 wikipedia
 python-dotenv
 
+
