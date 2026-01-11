@@ -2,12 +2,9 @@ import re
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from config import CHUNK_SIZE, CHUNK_OVERLAP
 
-
 def clean_text(text: str) -> str:
     text = re.sub(r"\s+", " ", text)
-    text = re.sub(r"\n+", "\n", text)
     return text.strip()
-
 
 def chunk_documents(documents):
     splitter = RecursiveCharacterTextSplitter(
@@ -25,9 +22,9 @@ def chunk_documents(documents):
                 "content": chunk,
                 "metadata": {
                     **doc.metadata,
-                    "chunk_index": i,
-                    "title": doc.metadata.get("source_id", "Unknown")
+                    "chunk_index": i
                 }
             })
 
     return chunks
+
