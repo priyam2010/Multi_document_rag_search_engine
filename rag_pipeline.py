@@ -4,7 +4,7 @@ from web_search import tavily_search
 
 client = Groq(api_key=GROQ_API_KEY)
 
-MAX_CONTEXT_CHARS = 8000
+MAX_CONTEXT_CHARS = 6000
 
 
 def safe_str(x):
@@ -58,17 +58,25 @@ def generate_answer(query, vectorstore, use_web=True):
         },
         {
             "role": "user",
-            "content": f"Question:\n{query}\n\nContext:\n{context}"
+            "content": f"{query}\n\nContext:\n{context}"
         }
     ]
 
-    response = client.chat.completions.create(
-        model=LLM_MODEL,
-        messages=messages,
-        temperature=0.3,
-        max_tokens=512
-    )
+    try:
+        response = client.chat.completions.create(
+            model=LLM_MODEL,
+            messages=messages,
+            temperature=0.2,
+            max_tokens=400,
+        )
+    except Exception as e:
+        # 🚨 DO NOT CRASH STREAMLIT
+        return f"Groq API Error: {str(e)}", sources, route
 
     return response.choices[0].message.content, sources, route
+
+
+
+
 
 
