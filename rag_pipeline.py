@@ -10,10 +10,10 @@ def get_llm(groq_api_key: str):
     if not groq_api_key:
         raise ValueError("Groq API key is missing")
 
-    return ChatGroq(
-        groq_api_key=groq_api_key,
-        model_name=LLM_MODEL
-    )
+   return ChatGroq(
+    api_key=groq_api_key,
+    model_name=LLM_MODEL
+)
 
 
 # -------------------------------
@@ -66,7 +66,8 @@ Context:
 """
 
     # ✅ LLM CREATED ONLY HERE
-    llm = get_llm(groq_api_key)
-    response = llm.invoke(prompt)
+   llm = get_llm(groq_api_key)
+response = llm.invoke(prompt)
 
     return response.content, sources, route
+
