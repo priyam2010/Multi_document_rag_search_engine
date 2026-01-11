@@ -1,7 +1,5 @@
-from dotenv import load_dotenv
-load_dotenv()
-
 import streamlit as st
+
 from loaders import load_uploaded_documents
 from text_utils import chunk_documents
 from vectorstore import index_documents, load_faiss_index
@@ -11,6 +9,12 @@ st.set_page_config(page_title="Hybrid RAG Search Engine", layout="wide")
 
 # ---------------- Sidebar ----------------
 st.sidebar.title("📄 Document Manager")
+
+# 🔑 GROQ API KEY INPUT (REQUIRED)
+groq_api_key = st.sidebar.text_input(
+    "Enter your GROQ API Key",
+    type="password"
+)
 
 use_web = st.sidebar.checkbox("Enable Tavily Web Search", value=True)
 
@@ -38,10 +42,20 @@ st.title("🔍 Hybrid RAG Search Engine")
 query = st.text_input("Ask a question:")
 
 if st.button("Search") and query:
-    if not vectorstore:
+
+    if not groq_api_key:
+        st.warning("Please enter your GROQ API key in the sidebar.")
+    
+    elif not vectorstore:
         st.warning("Please index documents first.")
+
     else:
-        answer, sources, route = generate_answer(query, vectorstore, use_web)
+        answer, sources, route = generate_answer(
+            query=query,
+            vectorstore=vectorstore,
+            groq_api_key=groq_api_key,
+            use_web=use_web
+        )
 
         icon = "📄" if route == "document" else "🌐" if route == "web" else "🔀"
 
