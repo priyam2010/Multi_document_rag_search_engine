@@ -1,10 +1,12 @@
-import os
+# app.py
 import streamlit as st
-
+from dotenv import load_dotenv
 from loaders import load_uploaded_documents
 from text_utils import chunk_documents
 from vectorstore import index_documents, load_faiss_index
 from rag_pipeline import generate_answer
+
+load_dotenv()
 
 st.set_page_config(page_title="Hybrid RAG Search Engine", layout="wide")
 
@@ -15,16 +17,13 @@ if "vectorstore" not in st.session_state:
 # ---------------- Sidebar ----------------
 st.sidebar.title("📄 Document Manager")
 
-# 🔑 GROQ API KEY
 groq_api_key = st.sidebar.text_input(
     "Enter your GROQ API Key",
     type="password"
 )
 
-# 🌐 Enable web search
 use_web = st.sidebar.checkbox("Enable Tavily Web Search", value=True)
 
-# 📄 Upload documents
 uploaded_files = st.sidebar.file_uploader(
     "Upload documents (PDF / TXT)",
     type=["pdf", "txt"],
@@ -37,38 +36,27 @@ if st.sidebar.button("Index Documents"):
         st.sidebar.warning("Please upload documents first.")
     else:
         try:
-            # Load and chunk documents
             docs = load_uploaded_documents(uploaded_files)
             chunks = chunk_documents(docs)
 
-            # Index chunks into FAISS
             index_documents(chunks)
-
-            # Load FAISS vectorstore into session state
             st.session_state.vectorstore = load_faiss_index()
-
             st.sidebar.success("✅ Documents Indexed Successfully")
-
         except Exception as e:
             st.sidebar.error("❌ Indexing failed")
             st.sidebar.exception(e)
 
 # ---------------- Main UI ----------------
 st.title("🔍 Hybrid RAG Search Engine")
-
 query = st.text_input("Ask a question:")
 
 if st.button("Search") and query:
-
     if not groq_api_key:
         st.warning("Please enter your GROQ API key in the sidebar.")
-
     elif st.session_state.vectorstore is None:
         st.warning("Please index documents first.")
-
     else:
         try:
-            # Generate answer using RAG pipeline
             answer, sources, route = generate_answer(
                 query=query,
                 vectorstore=st.session_state.vectorstore,
@@ -78,9 +66,7 @@ if st.button("Search") and query:
 
             icon = "📄" if route == "document" else "🌐" if route == "web" else "🔀"
 
-            # Display answer and sources in tabs
             tabs = st.tabs(["Answer", "Sources"])
-
             with tabs[0]:
                 st.markdown(f"### {icon} Answer")
                 st.write(answer)
