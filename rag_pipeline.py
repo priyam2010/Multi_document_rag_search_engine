@@ -1,35 +1,26 @@
-from langchain_groq import ChatGroq
-from config import GROQ_API_KEY, TOP_K
-from web_search import tavily_search
-
-
 import os
 from langchain_groq import ChatGroq
-
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+from langchain_core.messages import HumanMessage
+from config import GROQ_API_KEY, LLM_MODEL, TOP_K
+from web_search import tavily_search
 
 if not GROQ_API_KEY:
-    raise RuntimeError("GROQ_API_KEY is not set. Check .env loading.")
-
-from config import LLM_MODEL
+    raise RuntimeError("GROQ_API_KEY not set")
 
 llm = ChatGroq(
     groq_api_key=GROQ_API_KEY,
     model_name=LLM_MODEL
 )
 
-
-
+MAX_CONTEXT_CHARS = 12000
 
 def classify_query(query: str):
-    query = query.lower()
-
-    if "latest" in query or "current" in query or "recent" in query:
+    q = query.lower()
+    if "latest" in q or "recent" in q:
         return "web"
-    if "compare" in query or "vs" in query:
+    if "compare" in q or "vs" in q:
         return "hybrid"
     return "document"
-
 
 def generate_answer(query, vectorstore, use_web=True):
     route = classify_query(query)
@@ -40,17 +31,18 @@ def generate_answer(query, vectorstore, use_web=True):
         docs = vectorstore.similarity_search(query, k=TOP_K)
         for d in docs:
             context += d.page_content + "\n"
-            sources.append(f"[Doc] {d.metadata['title']} – Chunk {d.metadata['chunk_index']}")
+            sources.append(f"[Doc] {d.metadata['source_id']}")
 
     if route in ["web", "hybrid"] and use_web:
-        web_results = tavily_search(query)
-        for w in web_results:
+        for w in tavily_search(query):
             context += w["content"] + "\n"
             sources.append(f"[Web] {w['title']}")
 
+    context = context[:MAX_CONTEXT_CHARS]
+
     prompt = f"""
 Answer the question using the context below.
-Clearly ground the answer in the sources.
+Cite sources when possible.
 
 Question: {query}
 
@@ -58,6 +50,5 @@ Context:
 {context}
 """
 
-    response = llm.invoke(prompt)
-
+    response = llm.invoke([HumanMessage(content=prompt)])
     return response.content, sources, route
