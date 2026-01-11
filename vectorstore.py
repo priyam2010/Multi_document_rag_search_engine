@@ -1,5 +1,5 @@
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceInferenceEmbeddings
+from langchain_community.embeddings import HuggingFaceHubEmbeddings
 import os
 from config import FAISS_DIR
 
@@ -38,6 +38,7 @@ def load_faiss_index():
         embeddings,
         allow_dangerous_deserialization=True
     )
+
 
 
 
