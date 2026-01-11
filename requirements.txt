@@ -1,16 +1,16 @@
-streamlit
 langchain
 langchain-community
+langchain-google-genai
 langchain-huggingface
-langchain-text-splitters
 faiss-cpu
 sentence-transformers
+streamlit
 tavily-python
 pypdf
 pdfplumber
 wikipedia
 python-dotenv
-groq==0.9.0
+
 
 
 
