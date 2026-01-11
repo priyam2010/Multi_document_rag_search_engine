@@ -1,24 +1,19 @@
+import os
 from langchain_groq import ChatGroq
-from config import TOP_K, LLM_MODEL
+from config import LLM_MODEL, TOP_K
 from web_search import tavily_search
 
 
-# -------------------------------
-# LLM FACTORY (SAFE FOR STREAMLIT FREE)
-# -------------------------------
 def get_llm(groq_api_key: str):
     if not groq_api_key:
-        raise ValueError("Groq API key is missing")
+        raise ValueError("GROQ API key is missing")
 
-   return ChatGroq(
-    api_key=groq_api_key,
-    model_name=LLM_MODEL
-)
+    return ChatGroq(
+        groq_api_key=groq_api_key,
+        model_name=LLM_MODEL
+    )
 
 
-# -------------------------------
-# QUERY ROUTING
-# -------------------------------
 def classify_query(query: str):
     query = query.lower()
 
@@ -29,25 +24,21 @@ def classify_query(query: str):
     return "document"
 
 
-# -------------------------------
-# ANSWER GENERATION
-# -------------------------------
 def generate_answer(query, vectorstore, groq_api_key, use_web=True):
+    llm = get_llm(groq_api_key)
+
     route = classify_query(query)
     sources = []
     context = ""
 
-    # 🔹 DOCUMENT SEARCH
     if route in ["document", "hybrid"] and vectorstore:
         docs = vectorstore.similarity_search(query, k=TOP_K)
         for d in docs:
             context += d.page_content + "\n"
             sources.append(
-                f"[Doc] {d.metadata.get('title', 'Unknown')} – "
-                f"Chunk {d.metadata.get('chunk_index', 'N/A')}"
+                f"[Doc] {d.metadata.get('title', 'Unknown')} – Chunk {d.metadata.get('chunk_index', '')}"
             )
 
-    # 🔹 WEB SEARCH
     if route in ["web", "hybrid"] and use_web:
         web_results = tavily_search(query)
         for w in web_results:
@@ -58,16 +49,12 @@ def generate_answer(query, vectorstore, groq_api_key, use_web=True):
 Answer the question using the context below.
 Clearly ground the answer in the sources.
 
-Question:
-{query}
+Question: {query}
 
 Context:
 {context}
 """
 
-    # ✅ LLM CREATED ONLY HERE
-   llm = get_llm(groq_api_key)
-response = llm.invoke(prompt)
+    response = llm.invoke(prompt)
 
     return response.content, sources, route
-
