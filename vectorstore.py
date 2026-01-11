@@ -1,7 +1,7 @@
 # vectorstore.py
 import os
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceInferenceEmbeddings
+from langchain.embeddings import HuggingFaceHubEmbeddings  # ✅ Use this instead
 from config import FAISS_DIR
 from dotenv import load_dotenv
 
@@ -15,11 +15,11 @@ if not HF_API_KEY:
 
 def get_embeddings():
     """
-    Returns HuggingFace Inference Embeddings configured for CPU and Streamlit Free.
+    Returns HuggingFace Hub Embeddings configured for CPU.
     """
-    return HuggingFaceInferenceEmbeddings(
-        model="sentence-transformers/all-MiniLM-L6-v2",
-        task="feature-extraction",
+    return HuggingFaceHubEmbeddings(
+        repo_id="sentence-transformers/all-MiniLM-L6-v2",
+        model_kwargs={"device": "cpu"},  # 🔑 ensures no GPU usage
         huggingfacehub_api_token=HF_API_KEY
     )
 
@@ -46,3 +46,4 @@ def load_faiss_index():
         return None
     embeddings = get_embeddings()
     return FAISS.load_local(FAISS_DIR, embeddings)
+
