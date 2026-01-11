@@ -50,4 +50,3 @@ if st.button("Search") and query:
             st.markdown("### 📚 Evidence")
             for s in sources:
                 st.write(s)
-
