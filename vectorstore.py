@@ -1,18 +1,14 @@
-import os
-
-# 🔥 HARD BLOCK CUDA (must be before torch / sentence-transformers)
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
-os.environ["TORCH_DEVICE"] = "cpu"
-
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
+import os
 from config import FAISS_DIR
+import streamlit as st
 
 
 def get_embeddings():
-    return HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2",
-        encode_kwargs={"device": "cpu"}  # ✅ THIS is critical
+    return HuggingFaceInferenceAPIEmbeddings(
+        api_key=st.secrets["HUGGINGFACE_API_KEY"],
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
 
 
@@ -42,4 +38,9 @@ def load_faiss_index():
         embeddings,
         allow_dangerous_deserialization=True
     )
+
+
+
+
+
 
