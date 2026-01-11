@@ -9,7 +9,7 @@ TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
 # Models
 # Use gemini-1.5-flash for speed/cost or gemini-1.5-pro for complex reasoning
-LLM_MODEL = os.getenv("LLM_MODEL", "gemini-1.5-flash")
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.5-flash")
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 # Chunking
@@ -22,5 +22,6 @@ FAISS_DIR = os.getenv("FAISS_DIR", "data/faiss_index")
 
 # Retrieval
 TOP_K = 5
+
 
 
