@@ -1,17 +1,15 @@
-from langchain_groq import ChatGroq
-from langchain_core.messages import HumanMessage
+from groq import Groq
 from config import GROQ_API_KEY, LLM_MODEL, TOP_K
 from web_search import tavily_search
 
-llm = ChatGroq(
-    groq_api_key=GROQ_API_KEY,
-    model_name=LLM_MODEL
-)
+client = Groq(api_key=GROQ_API_KEY)
 
-MAX_CONTEXT_CHARS = 10000
+MAX_CONTEXT_CHARS = 8000
+
 
 def safe_str(x):
     return x if isinstance(x, str) else ""
+
 
 def classify_query(query: str):
     q = query.lower()
@@ -21,12 +19,13 @@ def classify_query(query: str):
         return "hybrid"
     return "document"
 
+
 def generate_answer(query, vectorstore, use_web=True):
     route = classify_query(query)
     sources = []
     context_parts = []
 
-    # ---------- DOCUMENT SEARCH ----------
+    # -------- DOCUMENT SEARCH --------
     if route in ["document", "hybrid"] and vectorstore:
         docs = vectorstore.similarity_search(query, k=TOP_K)
         for d in docs:
@@ -37,7 +36,7 @@ def generate_answer(query, vectorstore, use_web=True):
                     f"[Doc] {d.metadata.get('source_id', 'Unknown')} | Chunk {d.metadata.get('chunk_index', '?')}"
                 )
 
-    # ---------- WEB SEARCH ----------
+    # -------- WEB SEARCH --------
     if route in ["web", "hybrid"] and use_web:
         for w in tavily_search(query):
             text = safe_str(w.get("content"))
@@ -47,19 +46,29 @@ def generate_answer(query, vectorstore, use_web=True):
 
     context = "\n".join(context_parts).strip()
 
-    # 🚨 CRITICAL FIX
     if not context:
-        context = "No relevant context found. Answer using general knowledge."
+        context = "Answer the question using general knowledge."
 
     context = context[:MAX_CONTEXT_CHARS]
 
-    prompt = (
-        "You are a helpful assistant.\n"
-        "Answer the question clearly and concisely.\n\n"
-        f"Question:\n{query}\n\n"
-        f"Context:\n{context}"
+    messages = [
+        {
+            "role": "system",
+            "content": "You are a helpful assistant. Answer clearly and concisely."
+        },
+        {
+            "role": "user",
+            "content": f"Question:\n{query}\n\nContext:\n{context}"
+        }
+    ]
+
+    response = client.chat.completions.create(
+        model=LLM_MODEL,
+        messages=messages,
+        temperature=0.3,
+        max_tokens=512
     )
 
-    response = llm.invoke([HumanMessage(content=prompt)])
-    return response.content, sources, route
+    return response.choices[0].message.content, sources, route
+
 
