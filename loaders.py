@@ -32,3 +32,4 @@ def load_uploaded_documents(uploaded_files):
             )
 
     return documents
+
