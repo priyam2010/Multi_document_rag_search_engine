@@ -8,7 +8,7 @@ if not GROQ_API_KEY:
     raise RuntimeError("GROQ_API_KEY is not set")
 
 # ---------------- MODELS ----------------
-LLM_MODEL = os.getenv("LLM_MODEL", "llama3-8b-8192")
+LLM_MODEL = os.getenv("LLM_MODEL", "mixtral-8x7b-32768")
 EMBEDDING_MODEL = os.getenv(
     "EMBEDDING_MODEL",
     "sentence-transformers/all-MiniLM-L6-v2"
@@ -25,3 +25,4 @@ FAISS_DIR = os.path.join(BASE_DIR, "data", "faiss_index")
 
 # ---------------- RETRIEVAL ----------------
 TOP_K = int(os.getenv("TOP_K", 4))
+
