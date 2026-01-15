@@ -192,7 +192,7 @@ source venv/bin/activate   # Windows: venv\Scripts\activate
 -pip install -r requirements.txt
 
 3️⃣ Configure .env
-GROQ_API_KEY=your_groq_key
+Gemini_API_KEY=your_gemini_key
 TAVILY_API_KEY=your_tavily_key
 
 4️⃣ Run the App
